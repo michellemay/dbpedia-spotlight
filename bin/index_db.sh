@@ -103,13 +103,19 @@ if [ "$DATA_ONLY" != "true" ]; then
   cd $BASE_WDIR
   
   if [ -d dbpedia-spotlight ]; then
-      echo "Updating DBpedia Spotlight..."
       cd dbpedia-spotlight
-      git reset --hard HEAD
-      git pull
-      mvn -T 1C -q clean install
+      LOCAL=$(git rev-parse @)
+      REMOTE=$(git rev-parse @{u})
+      if [ $LOCAL = $REMOTE ]; then
+        echo "dbpedia-spotlight up-to-date..."
+      else
+        echo "Updating dbpedia-spotlight..."
+        git reset --hard HEAD
+        git pull
+        mvn -T 1C -q clean install
+      fi
   else
-      echo "Setting up DBpedia Spotlight..."
+      echo "Setting up dbpedia-spotlight..."
       git clone --depth 1 https://github.com/michellemay/dbpedia-spotlight.git
       cd dbpedia-spotlight
       mvn -T 1C -q clean install
@@ -121,11 +127,17 @@ cd $BASE_DIR
 
 #Set up pig:
 if [ -d $BASE_WDIR/pig ]; then
-    echo "Updating PigNLProc..."
     cd $BASE_WDIR/pig/pignlproc
-    git reset --hard HEAD
-    git pull
-    mvn -T 1C -q package -Dmaven.test.skip=true
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse @{u})
+    if [ $LOCAL = $REMOTE ]; then
+      echo "PigNLProc up-to-date..."
+    else
+      echo "Updating PigNLProc..."
+      git reset --hard HEAD
+      git pull
+      mvn -T 1C -q package -Dmaven.test.skip=true
+    fi
 else
     echo "Setting up PigNLProc..."
     mkdir -p $BASE_WDIR/pig/
