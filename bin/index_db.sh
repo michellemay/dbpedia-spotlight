@@ -15,7 +15,7 @@ export MVN_OPTS="-Xmx26G"
 usage ()
 {
      echo "index_db.sh"
-     echo "usage: ./index_db.sh -o /data/spotlight/nl/opennlp wdir nl_NL /data/spotlight/nl/stopwords.nl.list DutchStemmer /data/spotlight/nl/final_model"
+     echo "usage: ./index_db.sh -o /data/spotlight/nl/opennlp -s s3://bucket wdir nl_NL /data/spotlight/nl/stopwords.nl.list DutchStemmer /data/spotlight/nl/final_model"
      echo "Create a database-backed model of DBpedia Spotlight for a specified language."
      echo " "
 }
@@ -27,12 +27,13 @@ data_only="false"
 local_mode="false"
 
 
-while getopts "ledo:" opt; do
+while getopts "ledos:" opt; do
   case $opt in
     o) opennlp="$OPTARG";;
     e) eval="true";;
     d) data_only="true";;
-    l) local_mode="true"
+    l) local_mode="true";;
+    s) s3bucket="$OPTARG"
   esac
 done
 
@@ -138,6 +139,8 @@ fi
 # Stop processing if one step fails
 set -e
 
+wikifile="${LANGUAGE}wiki-latest-pages-articles.xml"
+
 if [ "$local_mode" == "true" ]; then
 
   if [ ! -e "$BASE_WDIR/pig/pig-0.10.1/" ]; then
@@ -158,17 +161,22 @@ if [ "$local_mode" == "true" ]; then
 else
   #Load the dump into HDFS:
 
-  if hadoop fs -test -e ${LANGUAGE}wiki-latest-pages-articles.xml ; then
-    echo "Dump already in HDFS."
+  if hadoop fs -test -f "$s3bucket/$wikifile" ; then
+    wikifile="$s3bucket/$wikifile" 
+    echo "Using Wikipedia dump file: $wikifile"
   else
-    echo "Loading Wikipedia dump into HDFS..."
-    if [ "$eval" == "false" ]; then
-        curl -# "http://dumps.wikimedia.org/${LANGUAGE}wiki/latest/${LANGUAGE}wiki-latest-pages-articles.xml.bz2" | bzcat | hadoop fs -put - ${LANGUAGE}wiki-latest-pages-articles.xml
+    wikifile="/user/$USER/${LANGUAGE}wiki-latest-pages-articles.xml"
+    if hadoop fs -test -e ${LANGUAGE}wiki-latest-pages-articles.xml ; then
+      echo "Dump already in HDFS."
     else
-        curl -# "http://dumps.wikimedia.org/${LANGUAGE}wiki/latest/${LANGUAGE}wiki-latest-pages-articles.xml.bz2" | bzcat | python $BASE_WDIR/pig/pignlproc/utilities/split_train_test.py 12000 $WDIR/heldout.txt | hadoop fs -put - ${LANGUAGE}wiki-latest-pages-articles.xml
+      echo "Loading Wikipedia dump into HDFS..."
+      if [ "$eval" == "false" ]; then
+          curl -# "http://dumps.wikimedia.org/${LANGUAGE}wiki/latest/${LANGUAGE}wiki-latest-pages-articles.xml.bz2" | bzcat | hadoop fs -put - ${LANGUAGE}wiki-latest-pages-articles.xml
+      else
+          curl -# "http://dumps.wikimedia.org/${LANGUAGE}wiki/latest/${LANGUAGE}wiki-latest-pages-articles.xml.bz2" | bzcat | python $BASE_WDIR/pig/pignlproc/utilities/split_train_test.py 12000 $WDIR/heldout.txt | hadoop fs -put - ${LANGUAGE}wiki-latest-pages-articles.xml
+      fi
     fi
   fi
-
 fi
 
 
@@ -226,7 +234,7 @@ if [ "$local_mode" == "true" ]; then
 
 else
 
-  PIG_INPUT="/user/$USER/${LANGUAGE}wiki-latest-pages-articles.xml"
+  PIG_INPUT="$wikifile"
   PIG_STOPWORDS="/user/$USER/stopwords.$LANGUAGE.list"
   TOKEN_OUTPUT="/user/$USER/$LANGUAGE/tokenCounts"
   PIG_TEMPORARY_SFS="/user/$USER/$LANGUAGE/sf_lookup"
