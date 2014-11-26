@@ -85,12 +85,14 @@ echo "Working directory: $WDIR"
 mkdir -p $WDIR
 
 #Download:
-echo "Downloading DBpedia dumps..."
 cd $WDIR
 if [ ! -f "redirects.nt" ]; then
+  echo "Downloading DBpedia dumps..."
   curl -# http://downloads.dbpedia.org/current/$LANGUAGE/redirects_$LANGUAGE.nt.bz2 | bzcat > redirects.nt
   curl -# http://downloads.dbpedia.org/current/$LANGUAGE/disambiguations_$LANGUAGE.nt.bz2 | bzcat > disambiguations.nt
   curl -# http://downloads.dbpedia.org/current/$LANGUAGE/instance_types_$LANGUAGE.nt.bz2 | bzcat > instance_types.nt
+else
+  echo "DBpedia dumps already present..."
 fi
 
 
@@ -107,7 +109,7 @@ if [ "$DATA_ONLY" != "true" ]; then
       mvn -T 1C -q clean install
   else
       echo "Setting up DBpedia Spotlight..."
-      git clone --depth 1 https://github.com/dbpedia-spotlight/dbpedia-spotlight.git
+      git clone --depth 1 https://github.com/michellemay/dbpedia-spotlight.git
       cd dbpedia-spotlight
       mvn -T 1C -q clean install
   fi
@@ -127,7 +129,7 @@ else
     echo "Setting up PigNLProc..."
     mkdir -p $BASE_WDIR/pig/
     cd $BASE_WDIR/pig/
-    git clone --depth 1 https://github.com/dbpedia-spotlight/pignlproc.git
+    git clone --depth 1 https://github.com/michellemay/pignlproc.git
     cd pignlproc
     echo "Building PigNLProc..."
     mvn -T 1C -q assembly:assembly -Dmaven.test.skip=true
