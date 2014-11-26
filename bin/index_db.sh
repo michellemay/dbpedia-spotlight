@@ -133,7 +133,7 @@ else
     git clone --depth 1 https://github.com/michellemay/pignlproc.git
     cd pignlproc
     echo "Building PigNLProc..."
-    mvn -T 1C -q assembly:assembly -Dmaven.test.skip=true
+    mvn -T 1C -q package -Dmaven.test.skip=true
 fi
 
 # Stop processing if one step fails
