@@ -125,7 +125,7 @@ if [ -d $BASE_WDIR/pig ]; then
     cd $BASE_WDIR/pig/pignlproc
     git reset --hard HEAD
     git pull
-    mvn -T 1C -q assembly:assembly -Dmaven.test.skip=true
+    mvn -T 1C -q package -Dmaven.test.skip=true
 else
     echo "Setting up PigNLProc..."
     mkdir -p $BASE_WDIR/pig/
