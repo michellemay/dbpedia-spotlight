@@ -65,7 +65,7 @@ object DisambiguationContextSource
     }
 
     def wikiPageCopy(wikiPage: WikiPage, newSource: String) = {
-        new WikiPage(wikiPage.title, wikiPage.redirect, wikiPage.id, wikiPage.revision, wikiPage.timestamp, newSource)
+        new WikiPage(wikiPage.title, wikiPage.redirect, wikiPage.id, wikiPage.revision, wikiPage.timestamp, wikiPage.contributorID, wikiPage.contributorName,  newSource, wikiPage.format)
     }
 
     /**
@@ -75,7 +75,7 @@ object DisambiguationContextSource
     {
         val splitDisambiguations = """\n"""
         
-        val wikiParser = WikiParser()
+        val wikiParser = WikiParser.getInstance()
 
         override def foreach[U](f : DBpediaResourceOccurrence => U) : Unit =
         {
@@ -88,33 +88,35 @@ object DisambiguationContextSource
                 val cleanSource = WikiMarkupStripper.stripEverythingButBulletPoints(wikiPage.source)
 
                 // parse the (clean) wiki page
-                val pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
-
-                if (pageNode.isDisambiguation) {
-                    val surfaceForm = new SurfaceForm(wikiPage.title.decoded.replace(" (disambiguation)", "")) //TODO language-specific
-
-                    // split the page node into list items
-                    val listItems = NodeUtil.splitNodes(pageNode.children, splitDisambiguations)
-                    var itemsCount = 0
-                    for (listItem <- listItems)
-                    {
-                        itemsCount += 1
-                        val id = pageNode.title.encoded+"-pl"+itemsCount
-                        getOccurrence(listItem, surfaceForm, id) match {
-                            case Some(occ) => (1 to multiply).foreach(i => f( occ )) ; occCount += 1
-                            case None =>
+                val pageNodeO = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
+                if (pageNodeO.nonEmpty) {
+                    val pageNode = pageNodeO.get
+                    if (pageNode.isDisambiguation) {
+                        val surfaceForm = new SurfaceForm(wikiPage.title.decoded.replace(" (disambiguation)", "")) //TODO language-specific
+  
+                        // split the page node into list items
+                        val listItems = NodeUtil.splitNodes(pageNode.children, splitDisambiguations)
+                        var itemsCount = 0
+                        for (listItem <- listItems)
+                        {
+                            itemsCount += 1
+                            val id = pageNode.title.encoded+"-pl"+itemsCount
+                            getOccurrence(listItem, surfaceForm, id) match {
+                                case Some(occ) => (1 to multiply).foreach(i => f( occ )) ; occCount += 1
+                                case None =>
+                            }
                         }
+  
+                        pageCount += 1
+                        if (pageCount %5000 == 0) {
+                            SpotlightLog.debug(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f disambiguation sentences per page", pageCount, occCount/pageCount.toDouble)
+                        }
+                        if (pageCount %100000 == 0) {
+                            SpotlightLog.info(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f disambiguation sentences per page", pageCount, occCount/pageCount.toDouble)
+                        }
+  
                     }
-
-                    pageCount += 1
-                    if (pageCount %5000 == 0) {
-                        SpotlightLog.debug(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f disambiguation sentences per page", pageCount, occCount/pageCount.toDouble)
-                    }
-                    if (pageCount %100000 == 0) {
-                        SpotlightLog.info(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f disambiguation sentences per page", pageCount, occCount/pageCount.toDouble)
-                    }
-
-                }
+               }
             }
         }
     }

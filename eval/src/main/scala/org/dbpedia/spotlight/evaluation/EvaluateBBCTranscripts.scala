@@ -70,7 +70,7 @@ object EvaluateBBCTranscripts {
 
         if (!new File(baseDir).exists) {
             System.err.println("Base directory does not exist. " + baseDir);
-            exit();
+            sys.exit();
         }
 
         // list with URIs in target KB (after removing namespace http://dbpedia.org/resource/)

@@ -62,7 +62,7 @@ object IndexMergedOccurrences
     def getBaseDir(baseDirName : String) : String = {
         if (! new File(baseDirName).exists) {
             println("Base directory not found! "+baseDirName);
-            exit();
+            sys.exit();
         }
         baseDirName
     }

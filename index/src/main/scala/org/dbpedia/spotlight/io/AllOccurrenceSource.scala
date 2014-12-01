@@ -68,7 +68,7 @@ object AllOccurrenceSource
      */
     private class AllOccurrenceSource(wikiPages : Source, multiplyDisambigs : Int=MULTIPLY_DISAMBIGUATION_CONTEXT) extends OccurrenceSource
     {
-        val wikiParser = WikiParser()
+        val wikiParser = WikiParser.getInstance()
 
         override def foreach[U](f : DBpediaResourceOccurrence => U) : Unit =
         {
@@ -77,69 +77,70 @@ object AllOccurrenceSource
 
             for (wikiPage <- wikiPages)
             {
-                var pageNode = wikiParser( wikiPage )
-
-                // disambiguations
-                if (pageNode.isDisambiguation) {
-                    // clean the wiki markup from everything but links
-                    val cleanSource = WikiMarkupStripper.stripEverythingButBulletPoints(wikiPage.source)
-
-                    // parse the (clean) wiki page
-                    pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
-
-                    val surfaceForm = new SurfaceForm(
-                            wikiPage.title.decoded.replace(" (disambiguation)", "").replaceAll("""^(The|A) """, ""))   //TODO i18n
-
-
-                    // split the page node into list items
-                    val listItems = NodeUtil.splitNodes(pageNode.children, splitDisambiguationsRegex)
-                    var itemsCount = 0
-                    for (listItem <- listItems)
-                    {
-                        itemsCount += 1
-                        val id = pageNode.title.encoded+"-pl"+itemsCount
-                        DisambiguationContextSource.getOccurrence(listItem, surfaceForm, id) match {
-                            case Some(occ) => {
-                                (1 to multiplyDisambigs).foreach{i => f( occ )}
-                                occCount += 1
-                            }
-                            case None =>
-                        }
-                    }
-                }
-
-                // definitions and occurrences
-                else if (!pageNode.isRedirect) {   // and not a disambiguation
-                    // Occurrences
-                    
-                    // clean the wiki markup from everything but links
-                    val cleanSource = WikiMarkupStripper.stripEverything(wikiPage.source)
-
-                    // parse the (clean) wiki page
-                    pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
+                var pageNodeO = wikiParser( wikiPage )
+                if (pageNodeO.nonEmpty) {
+                    var pageNode = pageNodeO.get
+                    // disambiguations
+                    if (pageNode.isDisambiguation) {
+                        // clean the wiki markup from everything but links
+                        val cleanSource = WikiMarkupStripper.stripEverythingButBulletPoints(wikiPage.source)
     
-                    // split the page node into paragraphs
-                    val paragraphs = NodeUtil.splitNodes(pageNode.children, splitParagraphsRegex)
-                    var paragraphCount = 0
-                    for (paragraph <- paragraphs) {
-                        paragraphCount += 1
-                        val idBase = pageNode.title.encoded+"-p"+paragraphCount
-                        WikiOccurrenceSource.getOccurrences(paragraph, idBase).foreach{occ =>
-                            occCount += 1
-                            f(occ)
+                        // parse the (clean) wiki page
+                        pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) ).get
+    
+                        val surfaceForm = new SurfaceForm(
+                                wikiPage.title.decoded.replace(" (disambiguation)", "").replaceAll("""^(The|A) """, ""))   //TODO i18n
+    
+    
+                        // split the page node into list items
+                        val listItems = NodeUtil.splitNodes(pageNode.children, splitDisambiguationsRegex)
+                        var itemsCount = 0
+                        for (listItem <- listItems)
+                        {
+                            itemsCount += 1
+                            val id = pageNode.title.encoded+"-pl"+itemsCount
+                            DisambiguationContextSource.getOccurrence(listItem, surfaceForm, id) match {
+                                case Some(occ) => {
+                                    (1 to multiplyDisambigs).foreach{i => f( occ )}
+                                    occCount += 1
+                                }
+                                case None =>
+                            }
                         }
                     }
-
-                    // Definition a.k.a. WikiPageContext
-                    val resource = new DBpediaResource(pageNode.title.encoded)
-                    val surfaceForm = new SurfaceForm(pageNode.title.decoded.replaceAll(""" \(.+?\)$""", "")
-                                                                            .replaceAll("""^(The|A) """, ""))
-                    val pageContext = new Text( WikiPageContextSource.getPageText(pageNode) )
-                    val offset = pageContext.text.indexOf(surfaceForm.name)
-                    f( new DBpediaResourceOccurrence(pageNode.title.encoded+"-", resource, surfaceForm, pageContext, offset, Provenance.Wikipedia) )
-
+    
+                    // definitions and occurrences
+                    else if (!pageNode.isRedirect) {   // and not a disambiguation
+                        // Occurrences
+                        
+                        // clean the wiki markup from everything but links
+                        val cleanSource = WikiMarkupStripper.stripEverything(wikiPage.source)
+    
+                        // parse the (clean) wiki page
+                        pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) ).get
+        
+                        // split the page node into paragraphs
+                        val paragraphs = NodeUtil.splitNodes(pageNode.children, splitParagraphsRegex)
+                        var paragraphCount = 0
+                        for (paragraph <- paragraphs) {
+                            paragraphCount += 1
+                            val idBase = pageNode.title.encoded+"-p"+paragraphCount
+                            WikiOccurrenceSource.getOccurrences(paragraph, idBase).foreach{occ =>
+                                occCount += 1
+                                f(occ)
+                            }
+                        }
+    
+                        // Definition a.k.a. WikiPageContext
+                        val resource = new DBpediaResource(pageNode.title.encoded)
+                        val surfaceForm = new SurfaceForm(pageNode.title.decoded.replaceAll(""" \(.+?\)$""", "")
+                                                                                .replaceAll("""^(The|A) """, ""))
+                        val pageContext = new Text( WikiPageContextSource.getPageText(pageNode) )
+                        val offset = pageContext.text.indexOf(surfaceForm.name)
+                        f( new DBpediaResourceOccurrence(pageNode.title.encoded+"-", resource, surfaceForm, pageContext, offset, Provenance.Wikipedia) )
+    
+                    }
                 }
-
                 pageCount += 1
                 if (pageCount %100000 == 0) {
                     SpotlightLog.info(this.getClass, "Processed %d Wikipedia definition pages (average %.2f links per page)", pageCount, occCount/pageCount.toDouble)

@@ -61,7 +61,7 @@ object EvaluateDisambiguationOnly
     def exists(fileName: String) {
         if (!new File(fileName).exists) {
             System.err.println("Important file/dir does not exist. "+fileName);
-            exit(1);
+            sys.exit(1);
         }
     }
 
@@ -90,7 +90,7 @@ object EvaluateDisambiguationOnly
         //            val trainingFile = new File(baseDir+"wikipediaTraining.50.amb.tsv")
         //            if (!trainingFile.exists) {
         //                System.err.println("Training file does not exist. "+trainingFile);
-        //                exit();
+        //                sys.exit();
         //            }
 
 

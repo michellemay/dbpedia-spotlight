@@ -94,7 +94,7 @@ object EvaluateTagExtraction
 
         if (!new File(baseDir).exists) {
             System.err.println("Base directory does not exist. "+baseDir);
-            exit();
+            sys.exit();
         }
 
         //ANNOTATE AND TRANSFORM TO MATRIX

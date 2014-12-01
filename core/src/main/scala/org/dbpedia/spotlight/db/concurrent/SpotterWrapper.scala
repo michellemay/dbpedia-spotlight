@@ -6,8 +6,8 @@ import akka.actor.{OneForOneStrategy, Props, ActorSystem, Actor}
 import akka.routing.SmallestMailboxRouter
 import akka.actor.SupervisorStrategy.Restart
 import org.dbpedia.spotlight.spot.Spotter
-import akka.dispatch.Await
-import akka.util.duration._
+import scala.concurrent.Await
+import scala.concurrent.duration._
 import akka.pattern.ask
 import akka.util
 
@@ -29,7 +29,7 @@ class SpotterWrapper(val spotters: Seq[Spotter]) extends Spotter {
   def size: Int = spotters.size
 
   val router = system.actorOf(Props[SpotterActor].withRouter(
-    SmallestMailboxRouter(routees = workers).withSupervisorStrategy(
+    SmallestMailboxRouter(routees = workers.toVector).withSupervisorStrategy(
       OneForOneStrategy(maxNrOfRetries = 10) {
         case _: IOException => Restart
       })

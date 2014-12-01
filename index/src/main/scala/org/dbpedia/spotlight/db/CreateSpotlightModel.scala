@@ -38,7 +38,7 @@ object CreateSpotlightModel {
 
   def main(args: Array[String]) {
 
-    val (localeCode: String, rawDataFolder: File, outputFolder: File, opennlpFolder: Option[File], stopwordsFile: File, stemmer: Stemmer) = try {
+    val (localeCode: String, rawDataFolder: File, outputFolder: File, opennlpFolder: Option[File @unchecked], stopwordsFile: File, stemmer: Stemmer) = try {
       (
         args(0),
         new File(args(1)),

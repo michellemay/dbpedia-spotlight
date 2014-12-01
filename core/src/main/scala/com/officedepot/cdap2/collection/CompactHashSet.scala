@@ -49,7 +49,6 @@ object CompactHashSet {
 
 /**
  */
-@cloneable
 class CompactHashSet[T: ClassManifest] () extends scala.collection.mutable.Set[T]  with Serializable {
 
   def this (set: FixedHashSet[T]) = {
@@ -167,7 +166,6 @@ class CompactHashSet[T: ClassManifest] () extends scala.collection.mutable.Set[T
 }
 
 /** Hash set backed by fixed size array. */
-@cloneable
 private abstract class FixedHashSet[T: ClassManifest] (final val bits: Int,
                                                        private[this] var array: Array[T],
                                                        final val loadFactor: Float) extends scala.collection.Set[T] with Serializable {

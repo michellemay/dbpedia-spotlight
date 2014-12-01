@@ -56,7 +56,7 @@ object WikiPageContextSource
      */
     private class WikipediaPageContextSource(wikiPages : Source) extends WikiPageSource
     {
-        val wikiParser = WikiParser()
+        val wikiParser = WikiParser.getInstance()
 
         override def foreach[U](f : WikiPageContext => U) : Unit =
         {
@@ -66,14 +66,16 @@ object WikiPageContextSource
                 val cleanSource = WikiMarkupStripper.stripEverything(wikiPage.source)
 
                 // parse the (clean) wiki page
-                val pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
-
-                // exclude redirects, disambiguation pages and other undesired pages (e.g. Lists)
-                if (!pageNode.isRedirect && !pageNode.isDisambiguation)
-                {
-                    val pageContext = new Text( getPageText(pageNode) )
-                    val resource = new DBpediaResource(pageNode.title.encoded)
-                    f( new WikiPageContext(resource, pageContext) )
+                val pageNodeO = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
+                if (pageNodeO.nonEmpty) {
+                    val pageNode = pageNodeO.get
+                    // exclude redirects, disambiguation pages and other undesired pages (e.g. Lists)
+                    if (!pageNode.isRedirect && !pageNode.isDisambiguation)
+                    {
+                        val pageContext = new Text( getPageText(pageNode) )
+                        val resource = new DBpediaResource(pageNode.title.encoded)
+                        f( new WikiPageContext(resource, pageContext) )
+                    }
                 }
             }
         }

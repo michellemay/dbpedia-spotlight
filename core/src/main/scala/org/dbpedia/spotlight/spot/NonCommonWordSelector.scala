@@ -9,7 +9,6 @@ import org.apache.commons.logging.Log
 import org.apache.log4j.Logger
 import org.dbpedia.spotlight.io.WortschatzParser
 
-
 /**
  * This is a temporary workaround to the common words problem.
  * It works as a blacklist of surface forms.
@@ -46,7 +45,7 @@ class NonCommonWordSelector(val filename: String, val load: Boolean = true) exte
         try {
             val in = new ObjectInputStream(new FileInputStream(file))
             set = in.readObject match {
-                case s: CompactHashSet[String] => s
+                case s: CompactHashSet[String @unchecked] => s
                 case _ => throw new ClassCastException("Serialized Object is not of type CompactHashSet[String] ");
             }
             in.close();

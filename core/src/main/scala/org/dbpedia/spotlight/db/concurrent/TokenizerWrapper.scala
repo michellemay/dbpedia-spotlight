@@ -5,9 +5,9 @@ import org.dbpedia.spotlight.model.{Token, Text}
 import akka.actor.{OneForOneStrategy, Props, ActorSystem, Actor}
 import akka.routing.SmallestMailboxRouter
 import akka.actor.SupervisorStrategy.Restart
-import akka.dispatch.Await
+import scala.concurrent.Await
 import akka.util
-import akka.util.duration._
+import scala.concurrent.duration._
 import akka.pattern.ask
 import org.apache.commons.lang.NotImplementedException
 import org.dbpedia.spotlight.db.tokenize.BaseTextTokenizer
@@ -31,7 +31,7 @@ class TokenizerWrapper(val tokenizers: Seq[TextTokenizer]) extends TextTokenizer
   def size: Int = tokenizers.size
 
   val router = system.actorOf(Props[TokenizerActor].withRouter(
-    SmallestMailboxRouter(routees = workers).withSupervisorStrategy(
+    SmallestMailboxRouter(routees = workers.toVector).withSupervisorStrategy(
       OneForOneStrategy(maxNrOfRetries = 10) {
         case _: IOException => Restart
       })

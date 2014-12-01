@@ -83,7 +83,7 @@ object WikiOccurrenceSource
      */
     private class WikiOccurrenceSource(wikiPages : Source) extends OccurrenceSource
     {
-        val wikiParser = WikiParser()
+        val wikiParser = WikiParser.getInstance()
 
         override def foreach[U](f : DBpediaResourceOccurrence => U) : Unit =
         {
@@ -96,30 +96,33 @@ object WikiOccurrenceSource
                 val cleanSource = WikiMarkupStripper.stripEverything(wikiPage.source)
 
                 // parse the (clean) wiki page
-                val pageNode = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
+                val pageNodeO = wikiParser( WikiPageUtil.copyWikiPage(wikiPage, cleanSource) )
+                if (pageNodeO.nonEmpty) {
+                    val pageNode = pageNodeO.get
 
-                // exclude redirect and disambiguation pages
-                if (!pageNode.isRedirect && !pageNode.isDisambiguation) {
-
-                    // split the page node into paragraphs
-                    val paragraphs = NodeUtil.splitNodes(pageNode.children, splitDocumentRegex)
-                    var paragraphCount = 0
-                    for (paragraph <- paragraphs)
-                    {
-                        paragraphCount += 1
-                        val idBase = pageNode.title.encoded+"-p"+paragraphCount
-                        getOccurrences(paragraph, idBase).foreach{occ => occCount += 1
-                                                                         f(occ)}
-                    }
-
-                    pageCount += 1
-                    if (pageCount %5000 == 0) {
-                        SpotlightLog.debug(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f links per page)", pageCount, occCount/pageCount.toDouble)
-                    }
-                    if (pageCount %100000 == 0) {
-                        SpotlightLog.info(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f links per page)", pageCount, occCount/pageCount.toDouble)
-                    }
-
+                   // exclude redirect and disambiguation pages
+                   if (!pageNode.isRedirect && !pageNode.isDisambiguation) {
+   
+                       // split the page node into paragraphs
+                       val paragraphs = NodeUtil.splitNodes(pageNode.children, splitDocumentRegex)
+                       var paragraphCount = 0
+                       for (paragraph <- paragraphs)
+                       {
+                           paragraphCount += 1
+                           val idBase = pageNode.title.encoded+"-p"+paragraphCount
+                           getOccurrences(paragraph, idBase).foreach{occ => occCount += 1
+                                                                            f(occ)}
+                       }
+   
+                       pageCount += 1
+                       if (pageCount %5000 == 0) {
+                           SpotlightLog.debug(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f links per page)", pageCount, occCount/pageCount.toDouble)
+                       }
+                       if (pageCount %100000 == 0) {
+                           SpotlightLog.info(this.getClass, "Processed %d Wikipedia definition pages (avarage %.2f links per page)", pageCount, occCount/pageCount.toDouble)
+                       }
+   
+                   }
                 }
             }
         }

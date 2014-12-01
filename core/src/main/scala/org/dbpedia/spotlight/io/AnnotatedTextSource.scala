@@ -19,7 +19,7 @@ import org.dbpedia.spotlight.model._
 import io.Source
 import java.io._
 import java.util.zip.{GZIPOutputStream, GZIPInputStream}
-import tools.nsc.doc.model.comment.Paragraph
+//import tools.nsc.doc.model.comment.Paragraph
 import org.apache.commons.lang.NotImplementedException
 import scala.collection.JavaConversions._
 import java.util.ArrayList

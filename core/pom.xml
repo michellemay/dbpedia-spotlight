@@ -138,7 +138,7 @@
 
         <dependency>
             <groupId>net.liftweb</groupId>
-            <artifactId>lift-json_${scala.compiler.version}</artifactId>
+            <artifactId>lift-json_${scala.majorversion}</artifactId>
         </dependency>
 
         <dependency>
@@ -192,7 +192,7 @@
 
         <dependency>
             <groupId>org.scalatest</groupId>
-            <artifactId>scalatest_${scala.compiler.version}</artifactId>
+            <artifactId>scalatest_${scala.majorversion}</artifactId>
         </dependency>
 
         <dependency>
@@ -221,23 +221,23 @@
         </dependency>
 
         <dependency>
-            <groupId>scala.ahocorasick</groupId>
-            <artifactId>spotter-aho</artifactId>
+            <groupId>com.corruptmemory</groupId>
+            <artifactId>spotter-aho_${scala.majorversion}</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.scalaz</groupId>
-            <artifactId>scalaz-core_${scala.compiler.version}</artifactId>
+            <artifactId>scalaz-core_${scala.majorversion}</artifactId>
         </dependency>
 
         <dependency>
             <groupId>org.scalanlp</groupId>
-            <artifactId>breeze-learn_${scala.compiler.version}</artifactId>
+            <artifactId>breeze-learn_2.10</artifactId>
         </dependency>
 
         <dependency>
             <groupId>com.typesafe.akka</groupId>
-            <artifactId>akka-actor</artifactId>
+            <artifactId>akka-actor_${scala.majorversion}</artifactId>
         </dependency>
 
 

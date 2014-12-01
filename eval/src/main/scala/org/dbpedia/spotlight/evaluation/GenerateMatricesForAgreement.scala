@@ -37,7 +37,7 @@ class GenerateMatricesForAgreement {
       val baseDir: String = args(0)+"/"
       if (!new File(baseDir).exists) {
         System.err.println("Base directory does not exist. "+baseDir);
-        exit();
+        sys.exit();
       }
 
       //TRANSFORM THE MANUAL ANNOTATIONS TO MATRIX      
