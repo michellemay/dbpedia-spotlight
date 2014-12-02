@@ -294,6 +294,7 @@ else
 
   PIG_LOCAL=""
 
+  hadoop fs -rm -r -f en 
 fi
 
 #Run pig:
@@ -330,6 +331,10 @@ if [ "$local_mode" == "true" ]; then
   cat $PIG_NE_OUTPUT/sfAndTotalCounts/part* > sfAndTotalCounts
 
 else
+  rm -f tokenCounts
+  rm -f pairCounts
+  rm -f uriCounts
+  rm -f sfAndTotalCounts
 
   hadoop fs -cat $LANGUAGE/tokenCounts/part* > tokenCounts
   hadoop fs -cat $LANGUAGE/names_and_entities/pairCounts/part* > pairCounts
@@ -344,12 +349,11 @@ cd $BASE_DIR
 cd $1/dbpedia-spotlight
 
 CREATE_MODEL="mvn -pl index exec:java -Dexec.mainClass=org.dbpedia.spotlight.db.CreateSpotlightModel -Dexec.args=\"$2 $WDIR $TARGET_DIR $opennlp $STOPWORDS $4Stemmer\";"
+echo "$CREATE_MODEL" > create_models.job.sh
+chmod +x create_models.job.sh
 
-if [ "$data_only" == "true" ]; then
-    echo "$CREATE_MODEL" >> create_models.job.sh
-else
+if [ ! "$data_only" == "true" ]; then
   eval "$CREATE_MODEL"
-  
   if [ "$eval" == "true" ]; then
       mvn -pl eval exec:java -Dexec.mainClass=org.dbpedia.spotlight.evaluation.EvaluateSpotlightModel -Dexec.args="$TARGET_DIR $WDIR/heldout.txt" > $TARGET_DIR/evaluation.txt
   fi
