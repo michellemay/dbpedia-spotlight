@@ -99,7 +99,27 @@ fi
 
 if [ "$DATA_ONLY" != "true" ]; then
 
-  #Set up Spotlight:
+  cd $BASE_WDIR
+
+  if [ -d extraction-framework ]; then
+      cd extraction-framework
+      LOCAL=$(git rev-parse @)
+      REMOTE=$(git rev-parse @{u})
+      if [ $LOCAL = $REMOTE ]; then
+        echo "extraction-framework up-to-date..."
+      else
+        echo "Updating extraction-framework..."
+        git reset --hard HEAD
+        git pull
+        mvn -T 1C -q clean install
+      fi
+  else
+      echo "Setting up extraction-framework..."
+      git clone --depth 1 https://github.com/michellemay/extraction-framework.git
+      cd extraction-framework
+      mvn -T 1C -q clean install
+  fi
+
   cd $BASE_WDIR
 
   if [ -d scala-aho-corasick ]; then
@@ -120,7 +140,29 @@ if [ "$DATA_ONLY" != "true" ]; then
       cd scala-aho-corasick
       mvn -T 1C -q clean install
   fi
-  
+  cd $BASE_WDIR
+
+  if [ -d scala-aho-corasick ]; then
+      cd scala-aho-corasick
+      LOCAL=$(git rev-parse @)
+      REMOTE=$(git rev-parse @{u})
+      if [ $LOCAL = $REMOTE ]; then
+        echo "scala-aho-corasick up-to-date..."
+      else
+        echo "Updating scala-aho-corasick..."
+        git reset --hard HEAD
+        git pull
+        mvn -T 1C -q clean install
+      fi
+  else
+      echo "Setting up scala-aho-corasick..."
+      git clone --depth 1 https://github.com/michellemay/scala-aho-corasick.git
+      cd scala-aho-corasick
+      mvn -T 1C -q clean install
+  fi
+ 
+  cd $BASE_WDIR
+ 
   if [ -d dbpedia-spotlight ]; then
       cd dbpedia-spotlight
       LOCAL=$(git rev-parse @)
