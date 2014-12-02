@@ -140,29 +140,9 @@ if [ "$DATA_ONLY" != "true" ]; then
       cd scala-aho-corasick
       mvn -T 1C -q clean install
   fi
+
   cd $BASE_WDIR
 
-  if [ -d scala-aho-corasick ]; then
-      cd scala-aho-corasick
-      LOCAL=$(git rev-parse @)
-      REMOTE=$(git rev-parse @{u})
-      if [ $LOCAL = $REMOTE ]; then
-        echo "scala-aho-corasick up-to-date..."
-      else
-        echo "Updating scala-aho-corasick..."
-        git reset --hard HEAD
-        git pull
-        mvn -T 1C -q clean install
-      fi
-  else
-      echo "Setting up scala-aho-corasick..."
-      git clone --depth 1 https://github.com/michellemay/scala-aho-corasick.git
-      cd scala-aho-corasick
-      mvn -T 1C -q clean install
-  fi
- 
-  cd $BASE_WDIR
- 
   if [ -d dbpedia-spotlight ]; then
       cd dbpedia-spotlight
       LOCAL=$(git rev-parse @)
@@ -182,31 +162,29 @@ if [ "$DATA_ONLY" != "true" ]; then
       mvn -T 1C -q clean install
   fi
 
-fi
+  cd $BASE_WDIR
 
-cd $BASE_DIR
-
-#Set up pig:
-if [ -d $BASE_WDIR/pig ]; then
-    cd $BASE_WDIR/pig/pignlproc
-    LOCAL=$(git rev-parse @)
-    REMOTE=$(git rev-parse @{u})
-    if [ $LOCAL = $REMOTE ]; then
-      echo "PigNLProc up-to-date..."
-    else
-      echo "Updating PigNLProc..."
-      git reset --hard HEAD
-      git pull
+  if [ -d pig ]; then
+      cd pig/pignlproc
+      LOCAL=$(git rev-parse @)
+      REMOTE=$(git rev-parse @{u})
+      if [ $LOCAL = $REMOTE ]; then
+        echo "PigNLProc up-to-date..."
+      else
+        echo "Updating PigNLProc..."
+        git reset --hard HEAD
+        git pull
+        mvn -T 1C -q package -Dmaven.test.skip=true
+      fi
+  else
+      echo "Setting up PigNLProc..."
+      mkdir -p pig
+      cd pig
+      git clone --depth 1 https://github.com/michellemay/pignlproc.git
+      cd pignlproc
+      echo "Building PigNLProc..."
       mvn -T 1C -q package -Dmaven.test.skip=true
-    fi
-else
-    echo "Setting up PigNLProc..."
-    mkdir -p $BASE_WDIR/pig/
-    cd $BASE_WDIR/pig/
-    git clone --depth 1 https://github.com/michellemay/pignlproc.git
-    cd pignlproc
-    echo "Building PigNLProc..."
-    mvn -T 1C -q package -Dmaven.test.skip=true
+  fi
 fi
 
 # Stop processing if one step fails
@@ -216,17 +194,17 @@ wikifile="${LANGUAGE}wiki-latest-pages-articles.xml"
 
 if [ "$local_mode" == "true" ]; then
 
-  if [ ! -e "$BASE_WDIR/pig/pig-0.10.1/" ]; then
+  if [ ! -e "$BASE_WDIR/pig/pig-0.12.1/" ]; then
     #Install pig:
     cd $BASE_WDIR/pig
-    wget http://apache.mirror.triple-it.nl/pig/pig-0.10.1/pig-0.10.1-src.tar.gz
-    tar xvzf pig-0.10.1-src.tar.gz
-    rm pig-0.10.1-src.tar.gz
-    cd pig-0.10.1-src
+    wget http://apache.mirror.triple-it.nl/pig/pig-0.12.1/pig-0.12.1-src.tar.gz
+    tar xvzf pig-0.12.1-src.tar.gz
+    rm pig-0.12.1-src.tar.gz
+    cd pig-0.12.1-src
     ant jar
   fi
 
-  export PATH=$BASE_WDIR/pig/pig-0.10.1-src/bin:$PATH
+  export PATH=$BASE_WDIR/pig/pig-0.12.1-src/bin:$PATH
 
   #Get the dump
   curl -L -# "http://dumps.wikimedia.org/${LANGUAGE}wiki/latest/${LANGUAGE}wiki-latest-pages-articles.xml.bz2" | bzcat > $WDIR/${LANGUAGE}wiki-latest-pages-articles.xml
