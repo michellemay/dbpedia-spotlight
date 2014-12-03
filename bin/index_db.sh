@@ -115,7 +115,7 @@ if [ "$DATA_ONLY" != "true" ]; then
       fi
   else
       echo "Setting up extraction-framework..."
-      git clone --depth 1 https://github.com/michellemay/extraction-framework.git
+      git clone --depth 1 https://github.com/dbpedia/extraction-framework.git
       cd extraction-framework
       mvn -T 1C -q clean install
   fi
