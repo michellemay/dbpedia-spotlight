@@ -71,10 +71,10 @@ object SpotlightModel {
     properties.load(new FileInputStream(new File(modelFolder, "model.properties")))
 
     //Read the version of the model folder. The lowest version supported by this code base is:
-    val supportedVersion = 1.0
+    val supportedVersion = 1.1
     val modelVersion = properties.getProperty("version", "0.1").toFloat
     if (modelVersion < supportedVersion)
-      throw new ConfigurationException("Incompatible model version %s. This version of DBpedia Spotlight requires models of version 1.0 or newer. Please download a current model from http://spotlight.sztaki.hu/downloads/.".format(modelVersion))
+      throw new ConfigurationException("Incompatible model version %s. This version of DBpedia Spotlight requires models of version 1.1 or newer. Please download a current model from http://spotlight.sztaki.hu/downloads/.".format(modelVersion))
 
 
     //Load the stemmer from the model file:

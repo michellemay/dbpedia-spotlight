@@ -17,13 +17,14 @@
 package org.dbpedia.spotlight.model
 
 import scala.collection.JavaConversions._
+import scala.collection.mutable
 import org.dbpedia.extraction.util.WikiUtil
-
 
 class DBpediaResource(var uri : String,
                       var support : Int = 0,
                       var prior : Double = 0.0,
-                      var types : List[OntologyType] = List[OntologyType]())
+                      var types : List[OntologyType] = List[OntologyType](),
+                      var properties : ResourceProperties = ResourceProperties())
 {
     var id: Int = 0
 
@@ -34,15 +35,15 @@ class DBpediaResource(var uri : String,
     uri = if (isEncoded(uri)) uri else WikiUtil.wikiEncode(uri)
 
     def this(uri : String) = {
-        this(uri, 0, 0.0, List[OntologyType]())
+        this(uri, 0, 0.0, List[OntologyType](), ResourceProperties())
     }
 
     def this(uri : String, support : Int) = {
-        this(uri, support, 0.0, List[OntologyType]())
+        this(uri, support, 0.0, List[OntologyType](), ResourceProperties())
     }
 
     def this(uri : String, support : Int, prior : Double) = {
-        this(uri, support, prior, List[OntologyType]())
+        this(uri, support, prior, List[OntologyType](), ResourceProperties())
     }
 
     override def equals(obj : Any) : Boolean = {
@@ -75,9 +76,16 @@ class DBpediaResource(var uri : String,
 
     def getTypes : java.util.List[OntologyType] = types
 
+    def setProperties(propertiesMap : ResourceProperties) {
+        properties = propertiesMap
+    }
+
+    def getProperties : ResourceProperties = properties
+
+    def getPropertiesAsJava : ResourcePropertiesAsJava = properties
+
     override def toString = {
         val typesString = if (types!=null && types.nonEmpty) types.filter(_!=null).filter(_.typeID!=null).map(_.typeID).mkString("(", ",", ")") else ""
-
         if (isExternalURI) {
             "WiktionaryResource["+uri+typesString+"]"
         } else {

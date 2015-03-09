@@ -38,7 +38,7 @@ object CreateSpotlightModel {
 
   def main(args: Array[String]) {
 
-    val (localeCode: String, rawDataFolder: File, outputFolder: File, opennlpFolder: Option[File @unchecked], stopwordsFile: File, stemmer: Stemmer) = try {
+    val (localeCode: String, rawDataFolder: File, outputFolder: File, opennlpFolder: Option[File], stopwordsFile: File, stemmer: Stemmer) = try {
       (
         args(0),
         new File(args(1)),
@@ -149,7 +149,7 @@ object CreateSpotlightModel {
     defaultProperties.setProperty("stemmer",   args(5))
     defaultProperties.setProperty("namespace", namespace)
     defaultProperties.setProperty("locale", localeCode)
-    defaultProperties.setProperty("version", "1.0")
+    defaultProperties.setProperty("version", "1.1")
 
 
     defaultProperties.store(new FileOutputStream(new File(outputFolder, "model.properties")), null)
@@ -186,6 +186,10 @@ object CreateSpotlightModel {
           new File(rawDataFolder, "instance_types.nt")
         else if (new File(rawDataFolder, "instanceTypes.tsv").exists())
           new File(rawDataFolder, "instanceTypes.tsv")
+        else
+          null,
+        if (new File(rawDataFolder, "mappingbased_properties.nt").exists())
+          new File(rawDataFolder, "mappingbased_properties.nt")
         else
           null,
         namespace

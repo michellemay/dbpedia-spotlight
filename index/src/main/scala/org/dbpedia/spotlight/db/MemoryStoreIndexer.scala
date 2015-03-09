@@ -164,6 +164,7 @@ class MemoryStoreIndexer(val baseDir: File, val quantizedCountStore: MemoryQuant
     val supportForID = new Array[Int](resourceCount.size+1)
     val uriForID = new Array[String](resourceCount.size+1)
     val typesForID = new Array[Array[java.lang.Short]](resourceCount.size+1)
+    val propertiesForID = new Array[ResourceProperties](resourceCount.size+1)
 
     resourceCount.foreach {
 
@@ -175,6 +176,7 @@ class MemoryStoreIndexer(val baseDir: File, val quantizedCountStore: MemoryQuant
         typesForID(el._1.id) = (el._1.getTypes map {
           ot: OntologyType => ontologyTypeStore.getOntologyTypeByName(ot.typeID).id}
           ).toArray
+        propertiesForID(el._1.id) = el._1.getProperties
 
       }
     }
@@ -183,6 +185,7 @@ class MemoryStoreIndexer(val baseDir: File, val quantizedCountStore: MemoryQuant
     resStore.supportForID = supportForID.map(quantizedCountStore.addCount).array
     resStore.uriForID = uriForID.array
     resStore.typesForID = typesForID.array
+    resStore.propertiesForID = propertiesForID.array
 
     MemoryStore.dump(resStore, new File(baseDir, "res.mem"))
   }

@@ -27,6 +27,7 @@ import org.dbpedia.spotlight.model.DBpediaResourceOccurrence;
 import org.dbpedia.spotlight.model.OntologyType;
 import org.dbpedia.spotlight.model.SurfaceForm;
 import org.xml.sax.SAXException;
+import org.xml.sax.Attributes;
 import org.xml.sax.helpers.AttributesImpl;
 
 import javax.xml.transform.OutputKeys;
@@ -39,6 +40,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 // SAX classes.
 //JAXP 1.1
@@ -51,6 +53,7 @@ import java.util.Map;
  */
 public class OutputManager {
 
+    private static final Attributes EMPTY_ATTRIBUTES = new AttributesImpl();
 
     private TransformerHandler initXMLDoc(ByteArrayOutputStream out) throws SAXException, TransformerConfigurationException {
         StreamResult streamResult = new StreamResult(out);
@@ -126,13 +129,43 @@ public class OutputManager {
             atts.addAttribute("","","support","CDATA",String.valueOf(occ.resource().support()));
             atts.addAttribute("","","types","CDATA",(occ.resource().types()).mkString(","));
             // support and types should go to resource
-
+            
             atts.addAttribute("", "", "surfaceForm", "CDATA", occ.surfaceForm().name());
             atts.addAttribute("","","offset","CDATA",String.valueOf(occ.textOffset()));
             atts.addAttribute("", "", "similarityScore", "CDATA", String.valueOf(occ.similarityScore()));
             atts.addAttribute("","","percentageOfSecondRank","CDATA",String.valueOf(occ.percentageOfSecondRank()));
 
             hd.startElement("","","Resource",atts);
+            int propIdx = 0;
+            for (Map.Entry<String, Set<String> > entry : occ.resource().getPropertiesAsJava().entrySet()) {
+                if (propIdx == 0) {
+                    hd.startElement("", "", "Properties", EMPTY_ATTRIBUTES);
+                }
+                hd.startElement("", "", "Property", EMPTY_ATTRIBUTES);
+
+                String key = entry.getKey();
+                hd.startElement("", "", "Key", EMPTY_ATTRIBUTES);
+                hd.startCDATA();
+                hd.characters(key.toCharArray(), 0, key.length());
+                hd.endCDATA();
+                hd.endElement("", "", "Key");
+
+                hd.startElement("", "", "Values", EMPTY_ATTRIBUTES);
+                for (String val : entry.getValue()) {
+                    hd.startElement("", "", "Value", EMPTY_ATTRIBUTES);
+                    hd.startCDATA();
+                    hd.characters(val.toCharArray(), 0, val.length());
+                    hd.endCDATA();
+                    hd.endElement("", "", "Value");
+                }
+                hd.endElement("", "", "Values");
+
+                hd.endElement("", "", "Property");
+                propIdx++;
+            }
+            if (propIdx > 0) {
+                hd.endElement("","","Properties");
+            }
             hd.endElement("","","Resource");
             i++;
         }
