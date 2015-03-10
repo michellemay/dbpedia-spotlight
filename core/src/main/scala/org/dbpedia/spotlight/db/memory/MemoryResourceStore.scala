@@ -1,7 +1,7 @@
 package org.dbpedia.spotlight.db.memory
 
 import org.dbpedia.spotlight.log.SpotlightLog
-import org.dbpedia.spotlight.model.{DBpediaResource, ResourceProperties}
+import org.dbpedia.spotlight.model.{DBpediaResource, ResourceProperties, OntologyTypeID}
 import java.lang.String
 import scala.collection.JavaConversions._
 import scala.{throws, transient}
@@ -24,7 +24,7 @@ class MemoryResourceStore
 
   var supportForID: Array[Short] = null
   var uriForID: Array[String] = null
-  var typesForID: Array[Array[java.lang.Short]] = null
+  var typesForID: Array[Array[OntologyTypeID]] = null
   var propertiesForID: Array[ResourceProperties] = null
 
   @transient
@@ -76,7 +76,7 @@ class MemoryResourceStore
     res.uri = uri
 
     res.id = id
-    res.setTypes((typeIDs map { typeID: java.lang.Short => ontologyTypeStore.getOntologyType(typeID) }).toList)
+    res.setTypes((typeIDs map { typeID: OntologyTypeID => ontologyTypeStore.getOntologyType(typeID) }).toList)
     res.setProperties(properties)
     res.setPrior(res.support / totalSupport)
 

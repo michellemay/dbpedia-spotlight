@@ -2,8 +2,8 @@ package org.dbpedia.spotlight.db.memory
 
 import org.dbpedia.spotlight.db.model.OntologyTypeStore
 import java.util.HashMap
-import org.dbpedia.spotlight.model.{Factory, OntologyType}
-import java.lang.{Short, String}
+import org.dbpedia.spotlight.model.{Factory, OntologyType, OntologyTypeID}
+import java.lang.String
 
 /**
  * @author Joachim Daiber
@@ -15,12 +15,12 @@ class MemoryOntologyTypeStore
   extends MemoryStore
   with OntologyTypeStore {
 
-  var idFromName: HashMap[String, Short] = null
-  var ontologyTypeFromID: HashMap[Short, OntologyType] = null
+  var idFromName: HashMap[String, OntologyTypeID] = null
+  var ontologyTypeFromID: HashMap[OntologyTypeID, OntologyType] = null
 
   def size = idFromName.size
 
-  def getOntologyType(id: Short): OntologyType = {
+  def getOntologyType(id: OntologyTypeID): OntologyType = {
     ontologyTypeFromID.get(id)
   }
 

@@ -24,4 +24,5 @@ package object model {
 		mutable.Map[String, java.util.TreeSet[String]]()
 	}
 	type ResourcePropertiesAsJava = java.util.Map[String, java.util.TreeSet[String]]
+	type OntologyTypeID = java.lang.Integer
 }

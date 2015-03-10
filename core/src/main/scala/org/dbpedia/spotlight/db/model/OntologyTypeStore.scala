@@ -1,7 +1,7 @@
 package org.dbpedia.spotlight.db.model
 
-import org.dbpedia.spotlight.model.OntologyType
-import java.lang.{Short, String}
+import org.dbpedia.spotlight.model.{OntologyType, OntologyTypeID}
+import java.lang.String
 
 /**
  *  A store interface for ontology types. Ontology types are currently
@@ -20,7 +20,7 @@ trait OntologyTypeStore {
    * @param id id of the ontology type.
    * @return
    */
-  def getOntologyType(id: Short): OntologyType
+  def getOntologyType(id: OntologyTypeID): OntologyType
 
   /**
    * Get the ontology type for its short name.

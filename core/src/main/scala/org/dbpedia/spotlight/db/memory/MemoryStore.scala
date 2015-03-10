@@ -2,7 +2,7 @@ package org.dbpedia.spotlight.db.memory
 
 
 import com.esotericsoftware.kryo.io.{Output, Input}
-import org.dbpedia.spotlight.model.{DBpediaType, FreebaseType, SchemaOrgType, OntologyType, ResourceProperties}
+import org.dbpedia.spotlight.model.{DBpediaType, FreebaseType, SchemaOrgType, OntologyType, OntologyTypeID, ResourceProperties}
 import java.io._
 import scala.Predef._
 import com.esotericsoftware.kryo.serializers.{DefaultArraySerializers, JavaSerializer}
@@ -61,7 +61,7 @@ object MemoryStore {
     kryo.register(classOf[Array[Int]], new DefaultArraySerializers.IntArraySerializer())
     kryo.register(classOf[Array[scala.Short]], new DefaultArraySerializers.ShortArraySerializer())
     kryo.register(classOf[Array[String]], new DefaultArraySerializers.StringArraySerializer())
-    kryo.register(classOf[Array[Array[Short]]], new JavaSerializer())
+    kryo.register(classOf[Array[Array[OntologyTypeID]]], new JavaSerializer())
     kryo.register(classOf[Array[ResourceProperties]])
     kryo.register(classOf[java.util.TreeSet[String]])
 

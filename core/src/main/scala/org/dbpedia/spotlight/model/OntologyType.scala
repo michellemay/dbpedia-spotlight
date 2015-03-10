@@ -18,7 +18,7 @@
 
 package org.dbpedia.spotlight.model
 
-import java.lang.{Short, String}
+import java.lang.{Integer, String}
 
 /**
  * Representation of types (DBpedia, Freebase, Schema.org, etc.)
@@ -33,7 +33,7 @@ trait OntologyType extends Serializable {
       def getFullUri: String
       def typeID: String = "OntologyTypeUnknown"
 
-      var id: Short = 0.toShort
+      var id: Integer = 0.toInt
 
       override def hashCode() : Int = {
         typeID.hashCode()
@@ -159,4 +159,22 @@ class OpenCycConcept(var name : String) extends OntologyType {
 
 object OpenCycConcept {
     val OPENCYCCONCEPT_PREFIX = "http://sw.opencyc.org/concept/"
+}
+
+@SerialVersionUID(8037662401509425322l)
+class YagoType(var name : String) extends OntologyType {
+
+    name = name.replace(YagoType.YAGO_PREFIX, "")
+
+    def equals(that : YagoType) : Boolean = {
+        name.equalsIgnoreCase(that.name)
+    }
+
+    override def getFullUri = YagoType.YAGO_PREFIX + name
+    override def typeID = "Yago:" + name
+
+}
+
+object YagoType {
+    val YAGO_PREFIX = "http://dbpedia.org/class/yago/"
 }
