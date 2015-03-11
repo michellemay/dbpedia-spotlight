@@ -2,7 +2,7 @@ package org.dbpedia.spotlight.db.memory
 
 
 import com.esotericsoftware.kryo.io.{Output, Input}
-import org.dbpedia.spotlight.model.{DBpediaType, FreebaseType, SchemaOrgType, OntologyType}
+import org.dbpedia.spotlight.model.{DBpediaType, FreebaseType, SchemaOrgType, OntologyType, OntologyTypeID, ResourceProperties}
 import java.io._
 import scala.Predef._
 import com.esotericsoftware.kryo.serializers.{DefaultArraySerializers, JavaSerializer}
@@ -11,11 +11,12 @@ import collection.mutable.HashMap
 import org.dbpedia.spotlight.log.SpotlightLog
 import com.esotericsoftware.kryo.serializers.DefaultSerializers.KryoSerializableSerializer
 import com.esotericsoftware.kryo.Kryo
+import com.twitter.chill.ScalaKryoInstantiator
 import org.dbpedia.spotlight.db.model.{TokenTypeStore, ResourceStore}
 import org.dbpedia.spotlight.db.FSADictionary
-import scala.Some
 import it.unimi.dsi.fastutil.objects.Object2ShortOpenHashMap
 import scala.Some
+import scala.collection.mutable
 
 
 /**
@@ -54,13 +55,15 @@ object MemoryStore {
 
   kryos.put(classOf[MemoryResourceStore].getSimpleName,
   {
-    val kryo = new Kryo()
-    kryo.setRegistrationRequired(true)
+    val instantiator = (new ScalaKryoInstantiator).setRegistrationRequired(true)
+    val kryo = instantiator.newKryo
 
     kryo.register(classOf[Array[Int]], new DefaultArraySerializers.IntArraySerializer())
     kryo.register(classOf[Array[scala.Short]], new DefaultArraySerializers.ShortArraySerializer())
     kryo.register(classOf[Array[String]], new DefaultArraySerializers.StringArraySerializer())
-    kryo.register(classOf[Array[Array[Short]]], new JavaSerializer())
+    kryo.register(classOf[Array[Array[OntologyTypeID]]], new JavaSerializer())
+    kryo.register(classOf[Array[ResourceProperties]])
+    kryo.register(classOf[java.util.TreeSet[String]])
 
     kryo.register(classOf[OntologyType])
     kryo.register(classOf[DBpediaType])

@@ -18,7 +18,7 @@
 
 package org.dbpedia.spotlight.model
 
-import java.lang.{Short, String}
+import java.lang.{Integer, String}
 
 /**
  * Representation of types (DBpedia, Freebase, Schema.org, etc.)
@@ -33,7 +33,7 @@ trait OntologyType extends Serializable {
       def getFullUri: String
       def typeID: String = "OntologyTypeUnknown"
 
-      var id: Short = 0.toShort
+      var id: Integer = 0.toInt
 
       override def hashCode() : Int = {
         typeID.hashCode()
@@ -154,9 +154,76 @@ class OpenCycConcept(var name : String) extends OntologyType {
 
     override def getFullUri = OpenCycConcept.OPENCYCCONCEPT_PREFIX + name
     override def typeID = "OpenCyc:" + name
-
 }
 
 object OpenCycConcept {
     val OPENCYCCONCEPT_PREFIX = "http://sw.opencyc.org/concept/"
+}
+
+@SerialVersionUID(8037662401509425322l)
+class YagoType(var name : String) extends OntologyType {
+
+    name = name.replace(YagoType.YAGO_PREFIX, "")
+
+    def equals(that : YagoType) : Boolean = {
+        name.equalsIgnoreCase(that.name)
+    }
+
+    override def getFullUri = YagoType.YAGO_PREFIX + name
+    override def typeID = "Yago:" + name
+}
+
+object YagoType {
+    val YAGO_PREFIX = "http://dbpedia.org/class/yago/"
+}
+
+@SerialVersionUID(8037662401509425321l)
+class FOAFType(var name : String) extends OntologyType {
+
+    name = name.replace(FOAFType.FOAF_PREFIX, "")
+
+    def equals(that : FOAFType) : Boolean = {
+        name.equalsIgnoreCase(that.name)
+    }
+
+    override def getFullUri = FOAFType.FOAF_PREFIX + name
+    override def typeID = "FOAF:" + name
+}
+
+object FOAFType {
+    val FOAF_PREFIX = "http://xmlns.com/foaf/0.1/"
+}
+
+@SerialVersionUID(8037662401509425320l)
+class DULType(var name : String) extends OntologyType {
+
+    name = name.replace(DULType.DUL_PREFIX, "")
+
+    def equals(that : DULType) : Boolean = {
+        name.equalsIgnoreCase(that.name)
+    }
+
+    override def getFullUri = DULType.DUL_PREFIX + name
+    override def typeID = "DUL:" + name
+}
+
+object DULType {
+    val DUL_PREFIX = "http://www.ontologydesignpatterns.org/ont/dul/DUL.owl#"
+}
+
+@SerialVersionUID(8037662401509425319l)
+class WikidataType(var name : String) extends OntologyType {
+
+    name = name.replace(WikidataType.WIKIDATA_PREFIX, "")
+
+    def equals(that : WikidataType) : Boolean = {
+        name.equalsIgnoreCase(that.name)
+    }
+
+    override def getFullUri = WikidataType.WIKIDATA_PREFIX + name
+    override def typeID = "Wikidata:" + name
+}
+
+object WikidataType {
+    val WIKIDATA_PREFIX = "http://wikidata.dbpedia.org/resource/"
 }

@@ -131,6 +131,18 @@ object Factory {
             if (uri.startsWith(OpenCycConcept.OPENCYCCONCEPT_PREFIX))
                 return new OpenCycConcept(uri)
 
+            if (uri.startsWith(YagoType.YAGO_PREFIX))
+                return new YagoType(uri)
+
+            if (uri.startsWith(FOAFType.FOAF_PREFIX))
+                return new FOAFType(uri)
+
+            if (uri.startsWith(DULType.DUL_PREFIX))
+                return new DULType(uri)
+
+            if (uri.startsWith(WikidataType.WIKIDATA_PREFIX))
+                return new WikidataType(uri)
+
             new DBpediaType(uri)
         }
 
@@ -147,6 +159,10 @@ object Factory {
                             case "f" | "freebase" => FreebaseType.fromTypeString(suffix)
                             case "s" | "schema" => new SchemaOrgType(suffix)
                             case "o" | "opencyc" => new OpenCycConcept(suffix)
+                            case "y" | "yago" => new YagoType(suffix)
+                            case "foaf" => new FOAFType(suffix)
+                            case "dul" => new DULType(suffix)
+                            case "wikidata" => new WikidataType(suffix)
                             case _ => new DBpediaType(ontologyType)
                         }
                     }

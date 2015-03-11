@@ -5,6 +5,7 @@ import java.io.{File, FileInputStream, InputStream}
 import org.dbpedia.spotlight.model.Factory.OntologyType
 import scala.collection.JavaConverters._
 import java.util.NoSuchElementException
+import scala.collection.mutable
 import scala.collection.mutable.HashSet
 import org.dbpedia.spotlight.db.WikipediaToDBpediaClosure
 import org.dbpedia.spotlight.log.SpotlightLog
@@ -98,6 +99,7 @@ object DBpediaResourceSource {
     wikipediaToDBpediaClosure: WikipediaToDBpediaClosure,
     resourceCounts: InputStream,
     instanceTypes: (String, InputStream),
+    instanceProperties: (String, InputStream),
     namespace: String
   ): java.util.Map[DBpediaResource, Int] = {
 
@@ -134,6 +136,35 @@ object DBpediaResourceSource {
         }
 
       }
+    }
+
+    // Read properties:
+    // TODO: support ttl file format
+    if (instanceProperties != null && instanceProperties._1.equals("nt")) {
+      SpotlightLog.info(this.getClass, "Reading properties (nt format)...")
+
+      val uriNotFound = HashSet[String]()
+
+      val redParser = new NxParser(instanceProperties._2)
+      while (redParser.hasNext) {
+        val triple = redParser.next
+        val subj = triple(0).toString.replace(namespace, "")
+
+        if (!subj.contains("__")) {
+          val pred = triple(1).toString
+          val obj  = triple(2).toString
+
+          try {
+            resourceByURI(new DBpediaResource(subj).uri).properties.getOrElseUpdate(pred, new java.util.TreeSet()).add(obj)
+          } catch {
+            case e: java.util.NoSuchElementException =>
+              uriNotFound += subj
+          }
+        }
+
+      }
+      SpotlightLog.info(this.getClass, "URI for %d properties definitions not found!".format(uriNotFound.size) )
+      SpotlightLog.info(this.getClass, "Done.")
     }
 
     //Read types:
@@ -193,6 +224,7 @@ object DBpediaResourceSource {
     wikipediaToDBpediaClosure: WikipediaToDBpediaClosure,
     counts: File,
     instanceTypes: File,
+    instanceProperties: File,
     namespace: String
   ): java.util.Map[DBpediaResource, Int] = fromPigInputStreams(
     wikipediaToDBpediaClosure,
@@ -203,6 +235,13 @@ object DBpediaResourceSource {
       (
         if(instanceTypes.getName.endsWith("nt")) "nt" else "tsv",
         new FileInputStream(instanceTypes)
+      ),
+    if(instanceProperties == null)
+      null
+    else
+      (
+        if(instanceProperties.getName.endsWith("nt")) "nt" else "tsv",
+        new FileInputStream(instanceProperties)
       ),
     namespace
   )

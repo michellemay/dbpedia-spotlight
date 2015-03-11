@@ -7,3 +7,4 @@ target
 *.log
 *~
 index/output
+*.DS_Store

@@ -201,6 +201,12 @@
         </dependency>
 
         <dependency>
+            <groupId>com.twitter</groupId>
+            <artifactId>chill_2.11</artifactId>
+            <version>0.5.2</version>
+        </dependency>
+
+        <dependency>
             <groupId>jdbm</groupId>
             <artifactId>jdbm</artifactId>
         </dependency>

@@ -294,7 +294,7 @@ else
 
   PIG_LOCAL=""
 
-  hadoop fs -rm -r -f en 
+  hadoop fs -rm -r -f $LANGUAGE
 fi
 
 #Run pig:
